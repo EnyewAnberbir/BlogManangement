@@ -21,19 +21,21 @@ app.use('/uploads', express.static(__dirname + '/uploads'));
 mongoose.connect('mongodb+srv://alebelmelak271019:sHtyKzzcqx2p4C8M@cluster0.gfndets.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
 //mongodb+srv://alebelmelak271019:sHtyKzzcqx2p4C8M@cluster0.gfndets.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 //sHtyKzzcqx2p4C8M
-// app.post('/register', async (req,res) => {
-//   const {username,password} = req.body;
-//   try{
-//     const userDoc = await User.create({
-//       username,
-//       password:bcrypt.hashSync(password,salt),
-//     });
-//     res.json(userDoc);
-//   } catch(e) {
-//     console.log(e);
-//     res.status(400).json(e);
-//   }
-//});
+
+// this is the new uncommented file
+app.post('/register', async (req,res) => {
+  const {username,password} = req.body;
+  try{
+    const userDoc = await User.create({
+      username,
+      password:bcrypt.hashSync(password,salt),
+    });
+    res.json(userDoc);
+  } catch(e) {
+    console.log(e);
+    res.status(400).json(e);
+  }
+});
 
 app.post('/login', async (req,res) => {
   const {username,password} = req.body;
