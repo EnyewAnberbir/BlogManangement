@@ -7,19 +7,23 @@ import { apiRequest, getAssetUrl } from '../api';
 
 export default function PostPage() {
   const [postInfo, setPostInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { userInfo, setUiError } = useContext(UserContext);
   const { id } = useParams();
 
   useEffect(() => {
+    setIsLoading(true);
     apiRequest(`/post/${id}`)
       .then((post) => {
         setPostInfo(post);
         setUiError('');
       })
-      .catch((error) => setUiError(error.message));
+      .catch((error) => setUiError(error.message))
+      .finally(() => setIsLoading(false));
   }, [id, setUiError]);
 
-  if (!postInfo) return '';
+  if (isLoading) return <p>Loading post...</p>;
+  if (!postInfo) return <p>Post unavailable.</p>;
 
   return (
     <div className="post-page">
