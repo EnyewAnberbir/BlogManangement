@@ -1,32 +1,32 @@
-import {Link} from "react-router-dom";
-import {useContext, useEffect, useState} from "react";
-import {UserContext} from "./UserContext";
+import { Link } from 'react-router-dom';
+import { useContext, useEffect } from 'react';
+import { UserContext } from './UserContext';
+import { apiRequest } from './api';
 
 export default function Header() {
-  const {setUserInfo,userInfo} = useContext(UserContext);
-  useEffect(() => {
-    fetch('http://localhost:4000/profile', {
-      credentials: 'include',
-    }).then(response => {
-      response.json().then(userInfo => {
-        setUserInfo(userInfo);
-      });
-    });
-  }, []);
+  const { setUserInfo, userInfo, refreshProfile, setUiError } = useContext(UserContext);
 
-  function logout() {
-    fetch('http://localhost:4000/logout', {
-      credentials: 'include',
-      method: 'POST',
-    });
-    setUserInfo(null);
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
+  async function logout() {
+    try {
+      await apiRequest('/logout', { method: 'POST' });
+      setUserInfo(null);
+      setUiError('');
+    } catch (error) {
+      setUiError(error.message);
+    }
   }
 
   const username = userInfo?.username;
 
   return (
     <header>
-      <Link to="/" className="logo">Blog-Post</Link>
+      <Link to="/" className="logo">
+        Blog-Post
+      </Link>
       <nav>
         {username && (
           <>
