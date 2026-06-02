@@ -23,6 +23,12 @@ const {
 } = require('./lib/validators');
 
 const salt = bcrypt.genSaltSync(10);
+const authCookieName = 'token';
+const authCookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production'
+};
 
 function createApp(config = getConfig()) {
   const app = express();
@@ -69,7 +75,7 @@ function createApp(config = getConfig()) {
 
       jwt.sign({ username, id: userDoc._id }, config.jwtSecret, {}, (err, token) => {
         if (err) return next(err);
-        res.cookie('token', token).json({
+        res.cookie(authCookieName, token, authCookieOptions).json({
           id: userDoc._id,
           username
         });
@@ -84,7 +90,11 @@ function createApp(config = getConfig()) {
   });
 
   app.post('/logout', (_req, res) => {
-    res.cookie('token', '').json('ok');
+    res.cookie(authCookieName, '', {
+      ...authCookieOptions,
+      expires: new Date(0)
+    });
+    res.json('ok');
   });
 
   app.post('/post', ensureAuth, uploadMiddleware.single('file'), async (req, res, next) => {
