@@ -51,6 +51,8 @@ Health check endpoint:
   - `npm run quality:boilerplate`
 - Run strict Silver-style maturity gate:
   - `npm run quality:boilerplate:strict`
+- Run full readiness check (format + lint + tests + strict gate):
+  - `npm run quality:ready`
 
 The boilerplate filter checks:
 
