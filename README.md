@@ -39,6 +39,13 @@ Create a local `.env` from `.env.example`.
 3. Start server:
    - `npm start`
 
+## Docker Setup
+
+Build and run with Docker:
+
+- `docker build -t blogmanangement .`
+- `docker run --rm -p 4000:4000 --env-file .env blogmanangement`
+
 Health check endpoint:
 
 - `GET /health` returns `{ "ok": true }`
@@ -47,11 +54,14 @@ Health check endpoint:
 
 - Run tests:
   - `npm test`
+- Run coverage-enforced test suite:
+  - `npm run quality:coverage`
 - Run boilerplate/starter-project quality check:
   - `npm run quality:boilerplate`
 - Run strict Silver-style maturity gate:
   - `npm run quality:boilerplate:strict`
 - Run full readiness check (format + lint + tests + strict gate):
+  - includes coverage enforcement
   - `npm run quality:ready`
 
 The boilerplate filter checks:

@@ -20,12 +20,16 @@ const originalUserFindOne = User.findOne;
 const originalUserCreate = User.create;
 const originalPostCreate = Post.create;
 const originalPostFindById = Post.findById;
+const originalPostFind = Post.find;
+const originalPostCountDocuments = Post.countDocuments;
 
 test.after(() => {
   User.findOne = originalUserFindOne;
   User.create = originalUserCreate;
   Post.create = originalPostCreate;
   Post.findById = originalPostFindById;
+  Post.find = originalPostFind;
+  Post.countDocuments = originalPostCountDocuments;
 });
 
 test('login and profile lifecycle returns authenticated profile', async () => {
@@ -95,4 +99,41 @@ test('post create/update lifecycle enforces auth and ownership', async () => {
     .field('content', 'Updated content has enough length to be valid');
 
   assert.equal(forbiddenUpdate.status, 403);
+});
+
+test('register returns 409 when username already exists', async () => {
+  User.create = async () => {
+    const error = new Error('duplicate key');
+    error.code = 11000;
+    throw error;
+  };
+
+  const response = await request(app)
+    .post('/register')
+    .send({ username: 'existing-user', password: 'strongPass123' });
+
+  assert.equal(response.status, 409);
+  assert.equal(response.body.error, 'username already exists');
+});
+
+test('post listing with metadata returns pagination envelope', async () => {
+  Post.find = () => ({
+    populate: () => ({
+      sort: () => ({
+        skip: () => ({
+          limit: async () => [{ _id: '1', title: 'demo-post' }]
+        })
+      })
+    })
+  });
+  Post.countDocuments = async () => 1;
+
+  const response = await request(app).get('/post?withMeta=true&page=1&limit=10');
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.page, 1);
+  assert.equal(response.body.limit, 10);
+  assert.equal(response.body.total, 1);
+  assert.equal(response.body.totalPages, 1);
+  assert.equal(Array.isArray(response.body.items), true);
 });

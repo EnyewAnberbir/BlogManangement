@@ -18,6 +18,10 @@ const checks = [
     command: 'npm test'
   },
   {
+    name: 'coverage',
+    command: 'npm run quality:coverage'
+  },
+  {
     name: 'boilerplate-strict',
     command:
       "powershell -Command \"$env:BOILERPLATE_STRICT='true'; node scripts/boilerplate-filter.js\""
