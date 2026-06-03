@@ -10,7 +10,11 @@ function requireAuth(jwtSecret) {
 
     try {
       const decoded = jwt.verify(token, jwtSecret);
-      req.auth = { id: decoded.id, username: decoded.username };
+      req.auth = {
+        id: decoded.id,
+        username: decoded.username,
+        role: decoded.role || 'author'
+      };
       next();
     } catch {
       next(createHttpError(401, 'invalid token'));

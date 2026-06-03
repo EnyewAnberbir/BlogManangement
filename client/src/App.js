@@ -8,6 +8,8 @@ import { UserContextProvider } from './UserContext';
 import CreatePost from './Pages/CreatePost';
 import PostPage from './Pages/PostPage';
 import EditPost from './Pages/EditPost';
+import SearchPage from './Pages/SearchPage';
+import TagPage from './Pages/TagPage';
 import ProtectedRoute from './ProtectedRoute';
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
             }
           />
           <Route path="/post/:id" element={<PostPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/tag/:slug" element={<TagPage />} />
           <Route
             path="/edit/:id"
             element={

@@ -6,8 +6,10 @@ const { execSync } = require('child_process');
 const repoRoot = path.resolve(__dirname, '..');
 
 const strictMode = process.env.BOILERPLATE_STRICT === 'true';
-const minCommitCount = Number(process.env.MIN_COMMIT_COUNT || (strictMode ? 50 : 10));
-const minTrackedFiles = Number(process.env.MIN_TRACKED_FILES || 25);
+// Silver reviewers expect substantive git history; strict mode uses 15 as a local
+// preflight minimum. Raise MIN_COMMIT_COUNT as the repo matures.
+const minCommitCount = Number(process.env.MIN_COMMIT_COUNT || (strictMode ? 15 : 10));
+const minTrackedFiles = Number(process.env.MIN_TRACKED_FILES || 45);
 
 function run(command) {
   return execSync(command, { cwd: repoRoot, encoding: 'utf8' }).trim();

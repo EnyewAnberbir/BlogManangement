@@ -1,25 +1,17 @@
-import Post from '../Post';
-import { useContext, useEffect, useState } from 'react';
-import { apiRequest } from '../api';
+import { useContext, useEffect } from 'react';
 import { UserContext } from '../UserContext';
+import PostCard from '../components/PostCard';
+import { usePosts } from '../hooks/usePosts';
 
 export default function IndexPage() {
-  const [posts, setPosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { setUiError } = useContext(UserContext);
+  const { posts, loading, error } = usePosts('withMeta=true&page=1&limit=20');
 
   useEffect(() => {
-    setIsLoading(true);
-    apiRequest('/post')
-      .then((allPosts) => {
-        setPosts(allPosts);
-        setUiError('');
-      })
-      .catch((error) => setUiError(error.message))
-      .finally(() => setIsLoading(false));
-  }, [setUiError]);
+    if (error) setUiError(error);
+  }, [error, setUiError]);
 
-  if (isLoading) {
+  if (loading) {
     return <p>Loading posts...</p>;
   }
 
@@ -27,5 +19,11 @@ export default function IndexPage() {
     return <p>No posts yet. Create the first one.</p>;
   }
 
-  return <>{posts.map((post) => <Post key={post._id} {...post} />)}</>;
+  return (
+    <section className="post-grid">
+      {posts.map((post) => (
+        <PostCard key={post._id} post={post} />
+      ))}
+    </section>
+  );
 }

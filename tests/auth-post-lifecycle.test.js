@@ -84,11 +84,23 @@ test('post create/update lifecycle enforces auth and ownership', async () => {
   assert.equal(authorizedCreate.status, 200);
   assert.equal(authorizedCreate.body.author, '507f1f77bcf86cd799439012');
 
-  Post.findById = async () => ({
-    author: {
-      equals: () => false
-    }
-  });
+  Post.findById = () => {
+    const query = {
+      populate: () => query,
+      then: (resolve) =>
+        resolve({
+          title: 't',
+          summary: 's',
+          content: 'c',
+          cover: 'cover.png',
+          author: { equals: () => false },
+          save: async function save() {
+            return this;
+          }
+        })
+    };
+    return query;
+  };
 
   const forbiddenUpdate = await request(app)
     .put('/post')

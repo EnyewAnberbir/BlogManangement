@@ -7,6 +7,7 @@ function ensureString(value) {
 function validateRegisterPayload(body) {
   const username = ensureString(body.username);
   const password = ensureString(body.password);
+  const displayName = ensureString(body.displayName);
 
   if (username.length < 4) {
     throw createHttpError(400, 'username must be at least 4 characters');
@@ -15,7 +16,7 @@ function validateRegisterPayload(body) {
     throw createHttpError(400, 'password must be at least 8 characters');
   }
 
-  return { username, password };
+  return { username, password, displayName };
 }
 
 function validateLoginPayload(body) {
@@ -27,6 +28,20 @@ function validateLoginPayload(body) {
   }
 
   return { username, password };
+}
+
+function validateProfileUpdatePayload(body) {
+  const displayName = body.displayName === undefined ? undefined : ensureString(body.displayName);
+  const bio = body.bio === undefined ? undefined : ensureString(body.bio);
+
+  if (displayName !== undefined && displayName.length > 80) {
+    throw createHttpError(400, 'displayName is too long');
+  }
+  if (bio !== undefined && bio.length > 500) {
+    throw createHttpError(400, 'bio is too long');
+  }
+
+  return { displayName, bio };
 }
 
 function validatePostPayload(body, mode = 'create') {
@@ -51,19 +66,42 @@ function validatePostPayload(body, mode = 'create') {
   return { id, title, summary, content };
 }
 
-function parsePagination(query) {
-  const rawPage = Number(query.page || 1);
-  const rawLimit = Number(query.limit || 20);
+function validateCommentPayload(body) {
+  const commentBody = ensureString(body.body);
+  if (commentBody.length < 2) {
+    throw createHttpError(400, 'comment body is too short');
+  }
+  return { body: commentBody };
+}
 
-  const page = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
-  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(Math.floor(rawLimit), 50) : 20;
+function parseTagNames(rawTags) {
+  if (!rawTags) return [];
+  if (Array.isArray(rawTags)) {
+    return rawTags.map((tag) => ensureString(tag)).filter(Boolean);
+  }
+  return ensureString(rawTags)
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
 
-  return { page, limit, skip: (page - 1) * limit };
+const allowedStatuses = ['draft', 'published', 'archived'];
+
+function parsePostStatus(rawStatus, fallback = 'published') {
+  const status = ensureString(rawStatus) || fallback;
+  if (!allowedStatuses.includes(status)) {
+    throw createHttpError(400, 'invalid post status');
+  }
+  return status;
 }
 
 module.exports = {
   validateRegisterPayload,
   validateLoginPayload,
+  validateProfileUpdatePayload,
   validatePostPayload,
-  parsePagination
+  validateCommentPayload,
+  parseTagNames,
+  parsePostStatus,
+  parsePagination: require('./pagination').parsePagination
 };

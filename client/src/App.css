@@ -164,3 +164,48 @@ a svg {
   padding: 10px 12px;
   margin-bottom: 20px;
 }
+
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.post-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.post-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.tag-pill {
+  background: #eef2ff;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.comment-list {
+  list-style: none;
+  padding: 0;
+}
+
+.comment-form textarea {
+  width: 100%;
+}
+
+.error-text {
+  color: #b91c1c;
+}

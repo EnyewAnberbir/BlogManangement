@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useContext, useEffect } from 'react';
 import { UserContext } from './UserContext';
 import { apiRequest } from './api';
+import SearchBar from './components/SearchBar';
 
 export default function Header() {
   const { setUserInfo, userInfo, refreshProfile, setUiError } = useContext(UserContext);
@@ -27,6 +28,7 @@ export default function Header() {
       <Link to="/" className="logo">
         Blog-Post
       </Link>
+      <SearchBar />
       <nav>
         {username && (
           <>

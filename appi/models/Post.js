@@ -34,6 +34,15 @@ const PostSchema = new Schema(
       type: String,
       required: true
     },
+    status: {
+      type: String,
+      enum: ['draft', 'published', 'archived'],
+      default: 'published',
+      index: true
+    },
+    tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
+    category: { type: Schema.Types.ObjectId, ref: 'Category' },
+    viewCount: { type: Number, default: 0, min: 0 },
     author: { type: Schema.Types.ObjectId, ref: 'User', required: true }
   },
   {

@@ -1,22 +1,15 @@
 # BlogManangement
 
-BlogManangement is a full-stack blog platform with:
+BlogManangement is a production-style full-stack publishing platform with authentication, editorial workflows, taxonomy, comments, search, and admin audit trails.
 
-- account registration and login
-- JWT cookie authentication
-- create/edit/list/read blog posts
-- image upload support for post cover assets
+## System scope
 
-## Repository Goals
+- **Backend API** (`appi/`) — layered routes, services, repositories, and models
+- **Frontend** (`client/`) — React app with reusable hooks/components
+- **Quality gates** (`scripts/`, `tests/`) — lint, coverage, and Silver preflight checks
+- **Docs** (`docs/`) — architecture and API references
 
-This repository is maintained as a real application workspace and includes:
-
-- backend API code under `appi/`
-- frontend code under `client/`
-- quality checks under `scripts/`
-- automated backend checks under `tests/`
-
-## Security Requirements
+## Security requirements
 
 No credentials should be committed in source code.
 
@@ -29,61 +22,48 @@ Set environment variables before running:
 
 Create a local `.env` from `.env.example`.
 
-## Local Setup
+## Local setup
 
-1. Install dependencies:
-   - `npm install`
-2. Set environment variables:
-   - copy `.env.example` to `.env`
-   - update values for your environment
-3. Start server:
-   - `npm start`
+1. Install dependencies: `npm install`
+2. Copy `.env.example` to `.env` and update values
+3. Start API server: `npm start`
+4. Start frontend (separate terminal): `cd client && npm install && npm start`
 
-## Docker Setup
+## Docker setup
 
-Build and run with Docker:
+```bash
+docker build -t blogmanangement .
+docker run --rm -p 4000:4000 --env-file .env blogmanangement
+```
 
-- `docker build -t blogmanangement .`
-- `docker run --rm -p 4000:4000 --env-file .env blogmanangement`
+Health check: `GET /health` → `{ "ok": true }`
 
-Health check endpoint:
+## Quality checks
 
-- `GET /health` returns `{ "ok": true }`
+| Command | Purpose |
+|---------|---------|
+| `npm test` | Backend integration/unit tests |
+| `npm run quality:coverage` | Coverage-enforced test run |
+| `npm run quality:boilerplate` | Repo maturity preflight (warn mode) |
+| `npm run quality:boilerplate:strict` | Strict maturity gate before Silver zip upload |
+| `npm run quality:ready` | Format + lint + tests + strict gate |
 
-## Quality Checks
-
-- Run tests:
-  - `npm test`
-- Run coverage-enforced test suite:
-  - `npm run quality:coverage`
-- Run boilerplate/starter-project quality check:
-  - `npm run quality:boilerplate`
-- Run strict Silver-style maturity gate:
-  - `npm run quality:boilerplate:strict`
-- Run full readiness check (format + lint + tests + strict gate):
-  - includes coverage enforcement
-  - `npm run quality:ready`
-
-The boilerplate filter checks:
-
-- minimum commit history count (configurable)
-- minimum tracked files count (configurable)
-- README language patterns that often indicate tutorial/scaffold content
-
-You can override thresholds with:
+Override local thresholds when needed:
 
 - `MIN_COMMIT_COUNT`
 - `MIN_TRACKED_FILES`
 
-Notes:
+## Silver repository packaging
 
-- `quality:boilerplate` is developer-friendly and warns when commit history is short.
-- `quality:boilerplate:strict` fails on short commit history and should be used before packaging for final Silver submission.
+When uploading to Silver:
 
-## API Notes
+1. Include the `.git/` directory in your zip (required for commit-based tasks).
+2. Do **not** exclude `.git/` in `.dockerignore`.
+3. Run `npm run quality:boilerplate:strict` before packaging.
+4. Keep the repo private on GitHub and avoid public mirrors.
 
-- `GET /health` returns service status.
-- `GET /profile` requires auth cookie (`token`).
-- `GET /post` returns an array (backward-compatible).
-- `GET /post?withMeta=true&page=1&limit=20` returns paginated metadata and items.
-- `POST /post` and `PUT /post` require auth and validate payload fields.
+## API quick reference
+
+See `docs/API.md` for endpoint details and `docs/ARCHITECTURE.md` for module boundaries.
+
+Legacy compatibility endpoints remain at the repo root (`/post`, `/login`, etc.) and are also exposed under `/api/v1`.
