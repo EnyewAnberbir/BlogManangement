@@ -3,6 +3,7 @@ const { parsePagination, buildPageEnvelope } = require('../lib/pagination');
 const commentRepository = require('../repositories/commentRepository');
 const postRepository = require('../repositories/postRepository');
 const auditService = require('./auditService');
+const notificationService = require('./notificationService');
 const { validateCommentPayload } = require('../lib/validators');
 
 async function addComment(auth, postId, body) {
@@ -21,6 +22,16 @@ async function addComment(auth, postId, body) {
   });
 
   await auditService.record(auth.id, 'comment.create', 'comment', comment._id, { status });
+  const authorId = postDoc.author?._id || postDoc.author;
+  if (authorId && String(authorId) !== String(auth.id)) {
+    await notificationService.notifyUser(
+      authorId,
+      'comment',
+      'New comment',
+      `Someone commented on "${postDoc.title}"`,
+      { postId, commentId: comment._id }
+    );
+  }
   return comment;
 }
 

@@ -6,7 +6,10 @@ const postRepository = require('../repositories/postRepository');
 const tagRepository = require('../repositories/tagRepository');
 const categoryRepository = require('../repositories/categoryRepository');
 const auditService = require('./auditService');
+const revisionService = require('./revisionService');
+const notificationService = require('./notificationService');
 const { validatePostPayload, parseTagNames, parsePostStatus } = require('../lib/validators');
+const { validateRenderableHtml } = require('../lib/contentSanitizer');
 
 function isPostAuthor(postDoc, authId) {
   const author = postDoc.author;
@@ -48,6 +51,10 @@ async function resolveCategory(categoryId) {
 
 async function createPost(auth, body, file) {
   const { title, summary, content } = validatePostPayload(body, 'create');
+  const renderCheck = validateRenderableHtml(content);
+  if (!renderCheck.ok) {
+    throw createHttpError(400, renderCheck.reason);
+  }
   const status = parsePostStatus(body.status, 'draft');
   const cover = persistUploadedFile(file);
   const tags = await resolveTags(body.tags);
@@ -65,6 +72,7 @@ async function createPost(auth, body, file) {
   });
 
   await auditService.record(auth.id, 'post.create', 'post', postDoc._id, { status });
+  await revisionService.snapshotPost(postDoc, auth.id);
   return postDoc;
 }
 
@@ -101,6 +109,7 @@ async function updatePost(auth, body, file) {
 
   await postRepository.savePost(postDoc);
   await auditService.record(auth.id, 'post.update', 'post', postDoc._id);
+  await revisionService.snapshotPost(postDoc, auth.id);
   return postDoc;
 }
 
@@ -113,6 +122,17 @@ async function publishPost(auth, postId) {
   postDoc.status = 'published';
   await postRepository.savePost(postDoc);
   await auditService.record(auth.id, 'post.publish', 'post', postDoc._id);
+  await revisionService.snapshotPost(postDoc, auth.id);
+  const authorId = postDoc.author?._id || postDoc.author;
+  if (!authorId.equals(auth.id)) {
+    await notificationService.notifyUser(
+      authorId,
+      'publish',
+      'Post published',
+      `"${postDoc.title}" is now live`,
+      { postId: postDoc._id }
+    );
+  }
   return postDoc;
 }
 

@@ -10,6 +10,8 @@
     "quality:coverage": "npm run test:coverage",
     "quality:boilerplate": "node scripts/boilerplate-filter.js",
     "quality:boilerplate:strict": "powershell -Command \"$env:BOILERPLATE_STRICT='true'; node scripts/boilerplate-filter.js\"",
+    "quality:silver-metrics": "node scripts/silver-source-metrics.js",
+    "seed": "node scripts/seed-database.js",
     "quality:ready": "node scripts/ready-check.js",
     "lint": "eslint \"**/*.js\"",
     "format": "prettier --write \"**/*.{js,json,md,css}\"",

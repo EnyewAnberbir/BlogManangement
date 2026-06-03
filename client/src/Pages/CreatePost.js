@@ -1,31 +1,21 @@
 import 'react-quill/dist/quill.snow.css';
 import { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import Editor from '../Editor';
 import { apiRequest } from '../api';
 import { UserContext } from '../UserContext';
+import PostEditorForm from '../components/PostEditorForm';
 
 export default function CreatePost() {
-  const [title, setTitle] = useState('');
-  const [summary, setSummary] = useState('');
-  const [content, setContent] = useState('');
-  const [files, setFiles] = useState('');
   const [redirect, setRedirect] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setUiError } = useContext(UserContext);
 
-  async function createNewPost(ev) {
-    ev.preventDefault();
+  async function createNewPost(formData) {
     setIsSubmitting(true);
-    const data = new FormData();
-    data.set('title', title);
-    data.set('summary', summary);
-    data.set('content', content);
-    data.set('file', files[0]);
     try {
       await apiRequest('/post', {
         method: 'POST',
-        body: data
+        body: formData
       });
       setUiError('');
       setRedirect(true);
@@ -39,25 +29,15 @@ export default function CreatePost() {
   if (redirect) {
     return <Navigate to={'/'} />;
   }
+
   return (
-    <form onSubmit={createNewPost}>
-      <input
-        type="title"
-        placeholder={'Title'}
-        value={title}
-        onChange={(ev) => setTitle(ev.target.value)}
+    <section>
+      <h1>Create post</h1>
+      <PostEditorForm
+        submitLabel="Create post"
+        isSubmitting={isSubmitting}
+        onSubmit={createNewPost}
       />
-      <input
-        type="summary"
-        placeholder={'Summary'}
-        value={summary}
-        onChange={(ev) => setSummary(ev.target.value)}
-      />
-      <input type="file" onChange={(ev) => setFiles(ev.target.files)} />
-      <Editor value={content} onChange={setContent} />
-      <button style={{ marginTop: '5px' }} disabled={isSubmitting}>
-        {isSubmitting ? 'Creating post...' : 'Create post'}
-      </button>
-    </form>
+    </section>
   );
 }

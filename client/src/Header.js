@@ -33,6 +33,15 @@ export default function Header() {
         {username && (
           <>
             <Link to="/create">Create new post</Link>
+            <Link to="/profile">Profile</Link>
+            <Link to="/notifications">Notifications</Link>
+            <Link to="/media">Media</Link>
+            {(userInfo?.role === 'editor' || userInfo?.role === 'admin') && (
+              <>
+                <Link to="/admin">Admin</Link>
+                <Link to="/moderation">Moderation</Link>
+              </>
+            )}
             <a onClick={logout}>Logout ({username})</a>
           </>
         )}
@@ -40,6 +49,7 @@ export default function Header() {
           <>
             <Link to="/login">Login</Link>
             <Link to="/register">Register</Link>
+            <Link to="/newsletter">Newsletter</Link>
           </>
         )}
       </nav>
